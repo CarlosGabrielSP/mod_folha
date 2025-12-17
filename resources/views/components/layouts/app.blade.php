@@ -16,6 +16,15 @@
 
     {{ $slot }}
 
+    <footer class="footer footer-center p-4 text-accent mt-4">
+        <div>
+            <div>Copyright © {{ date('Y') }} - Todos os direitos reservados</div>
+            <div>Desenvolvido por <a href="#"
+                    class="link link-hover font-bold italic text-lg text-primary hover:text-primary-focus">Locasis</a>
+            </div>
+        </div>
+    </footer>
+
     @livewireScripts
 
     <script>

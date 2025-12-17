@@ -1,19 +1,28 @@
 <?php
 
-use App\Enums\VinculoEnum;
+use App\Http\Controllers\CargoController;
 use App\Http\Controllers\FolhaController;
-use App\Http\Controllers\FuncionarioController;
-use App\Http\Controllers\RemuneracaoController;
+use App\Models\Entidade;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/servidores/1');
-});
+    $entidade = Entidade::first();
+    if (!$entidade) abort(404);
+    return redirect("/servidores/{$entidade->slug}");
+})->name('home');
 
-Route::get('/servidores', [FolhaController::class, 'index'])->name('folhas.index');
-Route::get('/servidores/{entidade}', [FolhaController::class, 'show'])->name('folhas.show');
+Route::get('/servidores/', function () {
+    $entidade = Entidade::first();
+    if (!$entidade) abort(404);
+    return redirect("/servidores/{$entidade->slug}");
+})->name('folhas.index');
 
-Route::get('/teste', function () {
-    $vinculos = VinculoEnum::cases();
-    dd($vinculos);
-});
+Route::get('/servidores/{slug}', [FolhaController::class, 'show'])->name('folhas.show');
+
+Route::get('/remuneracoes/', function () {
+    $entidade = Entidade::first();
+    if (!$entidade) abort(404);
+    return redirect("/remuneracoes/{$entidade->slug}");
+})->name('cargos.index');
+
+Route::get('/remuneracoes/{slug}', [CargoController::class, 'index'])->name('cargos.index');

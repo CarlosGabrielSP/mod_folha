@@ -1,11 +1,12 @@
 <nav class="navbar bg-neutral">
     <div class="navbar-start">
-        <a class="btn btn-primary text-xl">Locasis</a>
+        <a href="{{ route('home') }}" class="btn btn-primary text-xl">Portal de Transparência</a>
     </div>
+
     <div class="navbar-center text-neutral-content">
         <ul class="menu menu-horizontal px-1">
-            <li><a href="#">Lista Servidores</a></li>
-            <li><a href="#">Remunerações</a></li>
+            <li><a href="{{ route('folhas.index') }}">Lista Servidores</a></li>
+            <li><a href="{{ route('cargos.index') }}">Remunerações</a></li>
         </ul>
     </div>
 
