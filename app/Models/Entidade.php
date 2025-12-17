@@ -33,16 +33,8 @@ class Entidade extends Model
         );
     }
 
-    public function funcionarios()
-    {
-        return $this->hasMany(Funcionario::class);
-    }
-
-    // Retorna as folhas que contêm funcionários desta entidade
     public function folhas()
     {
-        return Folha::whereHas('funcionarios.funcionario', function ($query) {
-            $query->where('entidade_id', $this->id);
-        })->distinct();
+        return $this->hasMany(Folha::class);
     }
 }

@@ -12,10 +12,20 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->integer('mes');
             $table->integer('ano');
-            $table->timestamps();
+            $table->string('referencia')->index()->default('mensal');
+            $table->string('matricula');
+            $table->string('funcionario');
+            $table->string('situacao')->default('ativo');
+            $table->string('lotacao')->nullable();
+            $table->string('vinculo')->nullable();
+            $table->decimal('total_proventos', 10, 2)->default(0);
+            $table->decimal('total_descontos', 10, 2)->default(0);
+            $table->decimal('total_liquido', 10, 2)->default(0);
+            $table->foreignId('cargo_id')->constrained('cargos')->nullable();
+            $table->foreignId('entidade_id')->constrained('entidades');
 
-            // Uma folha única por mês/ano
-            $table->unique(['mes', 'ano']);
+            // Índice composto para performance em consultas por entidade e período
+            $table->index(['entidade_id', 'mes', 'ano']);
         });
     }
 

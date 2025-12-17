@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Folha;
 
+use App\Enums\SituacaoEnum;
+use App\Enums\VinculoEnum;
+use App\Enums\ReferenciaFolhaEnum;
 use App\Models\Cargo;
-use App\Models\Lotacao;
-use App\Models\RelFolhaFuncionario;
-use App\Models\Situacao;
-use App\Models\Vinculo;
+use App\Models\Folha;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -24,25 +24,25 @@ class Table extends Component
 
     public array $perPageOptions = [10, 20, 50, 100, 200, 500];
 
-    public string $sortField = 'funcionarios.nome';
+    public string $sortField = 'funcionario';
 
     public string $sortDirection = 'asc';
 
     public int $entidade_id;
 
     public float $total_descontos = 0;
-
+    
     public float $total_proventos = 0;
-
+    
     public float $total_liquido = 0;
+    
+    public array $referenciasFolha = [];
 
-    public Collection $vinculos;
-
-    public Collection $cargos;
-
-    public Collection $lotacoes;
-
-    public Collection $situacoes;
+    public array $vinculos = [];
+    
+    public array $cargos = [];
+    
+    public array $situacoes = [];
 
     // Filtros
     public string $matricula = '';
@@ -53,9 +53,9 @@ class Table extends Component
 
     public string $cargo = '';
 
-    public string $lotacao = '';
-
     public string $situacao = '';
+
+    public string $lotacao = '';
 
     public string $proventos = '';
 
@@ -63,40 +63,32 @@ class Table extends Component
 
     public string $liquido = '';
 
-    public function modal(): void
-    {
-        $this->js("console.log('modal');");
-    }
 
     public function mount(int $entidade_id): void
     {
         $this->entidade_id = $entidade_id;
 
-        $this->vinculos = Vinculo::all();
-        $this->cargos = Cargo::all();
-        $this->lotacoes = Lotacao::all();
-        $this->situacoes = Situacao::all();
+        $this->cargos = Cargo::all()->pluck('nome', 'id')->toArray();
+        $this->vinculos = VinculoEnum::cases();
+        $this->situacoes = SituacaoEnum::cases();
+        $this->referenciasFolha = ReferenciaFolhaEnum::cases();
     }
 
     public function sortBy(string $sortField): void
     {
-        // Campos permitidos para ordenação
         $allowedFields = [
-            'funcionarios.nome',
-            'funcionarios.matricula',
-            'folhas.mes',
-            'folhas.ano',
-            'cargos.nome',
-            'vinculos.nome',
-            'lotacoes.nome',
-            'situacoes.nome',
+            'matricula',
+            'funcionario',
+            'vinculo',
+            'lotacao',
+            'situacao',
             'total_proventos',
             'total_descontos',
             'total_liquido',
         ];
 
-        if (! in_array($sortField, $allowedFields)) {
-            return; // Ignora campos não permitidos
+        if (!in_array($sortField, $allowedFields)) {
+            return;
         }
 
         if ($this->sortField === $sortField) {
@@ -113,72 +105,49 @@ class Table extends Component
             return collect([]);
         }
 
-        $query = RelFolhaFuncionario::with([
-            'folha',
-            'funcionario',
-            'funcionario.entidade',
-            'funcionario.cargo',
-            'funcionario.lotacao',
-            'funcionario.vinculo',
-            'funcionario.situacao',
-        ])
-            ->join('funcionarios', 'folhas_funcionarios.funcionario_id', '=', 'funcionarios.id')
-            ->leftJoin('cargos', 'funcionarios.cargo_id', '=', 'cargos.id')
-            ->leftJoin('vinculos', 'funcionarios.id_vinculos', '=', 'vinculos.id')
-            ->leftJoin('lotacoes', 'funcionarios.id_lotacoes', '=', 'lotacoes.id')
-            ->leftJoin('situacoes', 'funcionarios.id_situacoes', '=', 'situacoes.id')
-            ->where('funcionarios.entidade_id', $this->entidade_id)
-            ->when($this->mes_ano, function ($query) {
-                $data = explode('-', $this->mes_ano);
-                $query->join('folhas', 'folhas_funcionarios.folha_id', '=', 'folhas.id')
-                    ->where('folhas.ano', $data[0])
-                    ->where('folhas.mes', $data[1]);
-            })
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('funcionarios.nome', 'like', "%{$this->search}%")
-                        ->orWhereHas('funcionario.cargo', function ($query) {
-                            $query->whereLike('nome', "%{$this->search}%");
-                        })
-                        ->orWhereHas('funcionario.lotacao', function ($query) {
-                            $query->whereLike('nome', "%{$this->search}%");
-                        })
-                        ->orWhereHas('funcionario.vinculo', function ($query) {
-                            $query->whereLike('nome', "%{$this->search}%");
-                        })
-                        ->orWhereHas('funcionario.situacao', function ($query) {
-                            $query->whereLike('nome', "%{$this->search}%");
-                        });
-                });
-            })
-            ->when($this->matricula, function ($query) {
-                $query->whereLike('funcionarios.matricula', "%{$this->matricula}%");
-            })
-            ->when($this->nome, function ($query) {
-                $query->whereLike('funcionarios.nome', "%{$this->nome}%");
-            })
-            ->when($this->vinculo, function ($query) {
-                $query->where('funcionarios.id_vinculos', $this->vinculo);
-            })
-            ->when($this->cargo, function ($query) {
-                $query->where('funcionarios.id_cargos', $this->cargo);
-            })
-            ->when($this->lotacao, function ($query) {
-                $query->where('funcionarios.id_lotacoes', $this->lotacao);
-            })
-            ->when($this->situacao, function ($query) {
-                $query->where('funcionarios.id_situacoes', $this->situacao);
-            })
-            ->when($this->proventos, function ($query) {
-                $query->whereLike('total_proventos', "{$this->proventos}%");
-            })
-            ->when($this->descontos, function ($query) {
-                $query->whereLike('total_descontos', "{$this->descontos}%");
-            })
-            ->when($this->liquido, function ($query) {
-                $query->whereLike('total_liquido', "{$this->liquido}%");
-            })
-            ->select('folhas_funcionarios.*');
+        $query = Folha::with(['entidade', 'cargo'])
+        ->where('entidade_id', $this->entidade_id)
+        ->where('mes', explode('-', $this->mes_ano)[1])
+        ->where('ano', explode('-', $this->mes_ano)[0])
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->whereLike('funcionario', "%{$this->search}%")
+                    ->orWhereLike('matricula', "%{$this->search}%")
+                    ->orWhereLike('vinculo', "%{$this->search}%")
+                    ->orWhereLike('lotacao', "%{$this->search}%")
+                    ->orWhereLike('situacao', "%{$this->search}%")
+                    ->orWhereHas('cargo', function ($query) {
+                        $query->whereLike('nome', "%{$this->search}%");
+                    });
+            });
+        })
+        ->when($this->matricula, function ($query) {
+            $query->whereLike('matricula', "%{$this->matricula}%");
+        })
+        ->when($this->nome, function ($query) {
+            $query->whereLike('funcionario', "%{$this->nome}%");
+        })
+        ->when($this->cargo, function ($query) {
+            $query->where('cargo_id', $this->cargo);
+        })
+        ->when($this->vinculo, function ($query) {
+            $query->where('vinculo', $this->vinculo);
+        })
+        ->when($this->lotacao, function ($query) {
+            $query->whereLike('lotacao', "%{$this->lotacao}%");
+        })
+        ->when($this->situacao, function ($query) {
+            $query->where('situacao', $this->situacao);
+        })
+        ->when($this->proventos, function ($query) {
+            $query->whereLike('total_proventos', "{$this->proventos}%");
+        })
+        ->when($this->descontos, function ($query) {
+            $query->whereLike('total_descontos', "{$this->descontos}%");
+        })
+        ->when($this->liquido, function ($query) {
+            $query->whereLike('total_liquido', "{$this->liquido}%");
+        });
 
         $this->total_descontos = $query->sum('total_descontos');
         $this->total_proventos = $query->sum('total_proventos');
@@ -189,7 +158,18 @@ class Table extends Component
 
     public function limparFiltros(): void
     {
-        $this->reset(['search', 'matricula', 'nome', 'vinculo', 'cargo', 'lotacao', 'situacao', 'proventos', 'descontos', 'liquido']);
+        $this->reset([
+            'search',
+            'matricula',
+            'nome',
+            'vinculo',
+            'cargo',
+            'lotacao',
+            'situacao',
+            'proventos',
+            'descontos',
+            'liquido'
+        ]);
     }
 
     public function render()
@@ -199,3 +179,4 @@ class Table extends Component
         ]);
     }
 }
+

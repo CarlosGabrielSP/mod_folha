@@ -16,22 +16,41 @@ class Folha extends Model
 
     // public $incrementing = false;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'id',
         'mes',
         'ano',
+        'referencia',
+        'matricula',
+        'funcionario',
+        'situacao',
+        'lotacao',
+        'vinculo',
+        'total_proventos',
+        'total_descontos',
+        'total_liquido',
+        'cargo_id',
+        'entidade_id',
     ];
 
-    public function funcionarios()
+    protected $casts = [
+        'referencia' => \App\Enums\ReferenciaFolhaEnum::class,
+        'situacao' => \App\Enums\SituacaoEnum::class,
+        'vinculo' => \App\Enums\VinculoEnum::class,
+        'total_proventos' => 'decimal:2',
+        'total_descontos' => 'decimal:2',
+        'total_liquido' => 'decimal:2',
+    ];
+
+    public function cargo()
     {
-        return $this->hasMany(RelFolhaFuncionario::class, 'folha_id');
+        return $this->belongsTo(Cargo::class);
     }
 
-    // Retorna as entidades distintas dos funcionários desta folha
-    public function entidades()
+    public function entidade()
     {
-        return Entidade::whereHas('funcionarios.folhas', function ($query) {
-            $query->where('folhas.id', $this->id);
-        })->distinct();
+        return $this->belongsTo(Entidade::class);
     }
 }

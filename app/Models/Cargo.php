@@ -18,8 +18,8 @@ class Cargo extends Model
         'salario_base',
     ];
 
-    public function funcionarios()
+    public function folhas()
     {
-        return $this->hasMany(Funcionario::class);
+        return $this->hasMany(Folha::class);
     }
 }

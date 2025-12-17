@@ -21,11 +21,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            BaseTablesSeeder::class,
-            EventoSeeder::class,
             EntidadeSeeder::class,
             CargoSeeder::class,
-            FuncionarioSeeder::class,
             FolhaSeeder::class,
         ]);
     }

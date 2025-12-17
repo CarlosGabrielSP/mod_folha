@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('carga_horaria')->nullable();
             $table->string('salario_base')->nullable();
             $table->timestamps();
+
+            $table->index('nome');
         });
     }
 

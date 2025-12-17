@@ -54,26 +54,15 @@
         <div class="md:hidden">
             @forelse ($despesas as $despesa)
                 <div class="border-b border-base-300 p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="font-mono text-sm">{{ $despesa->funcionario->matricula }}</div>
-                        <a href="{{ route('funcionarios.show', ['funcionario' => $despesa->funcionario->id, 'despesa' => $despesa->id]) }}"
-                            class="btn btn-primary btn-circle border border-accent">
-                            <svg class="text-accent size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                            </svg>
-                        </a>
-                    </div>
                     <div class="flex justify-between items-center mb-1">
                         <div class="flex flex-col">
-                            <div class="font-medium">{{ $despesa->funcionario->nome }}</div>
-                            <div class="text-xs text-base-content/60 mb-2">{{ $despesa->funcionario->vinculo->nome }}</div>
+                            <div class="font-medium">{{ $despesa->funcionario }}</div>
+                            <div class="text-xs text-base-content/60 mb-2">{{ $despesa->vinculo?->label() }}</div>
                         </div>
-                        <span class="badge badge-outline badge-sm">{{ $despesa->funcionario->situacao->nome }}</span>
+                        <span class="badge badge-outline badge-sm">{{ $despesa->situacao?->label() }}</span>
                     </div>
 
-                    <div class="text-sm">{{ $despesa->funcionario->cargo->nome }}</div>
+                    <div class="text-sm">{{ $despesa->cargo?->nome }}</div>
 
                     <div class="grid grid-cols-3 gap-2 mt-3">
                         <div>
@@ -130,12 +119,11 @@
             <table class="table table-zebra table-sm">
                 <thead class="bg-neutral text-neutral-content">
                     <tr>
-                        <th>DETALHES</th>
-                        <th wire:click="sortBy('funcionarios.matricula')"
+                        <th wire:click="sortBy('matricula')"
                             class="cursor-pointer hover:bg-neutral-focus transition-colors">
                             <div class="flex items-center gap-2">
                                 <span>MATRÍCULA</span>
-                                @if($sortField === 'funcionarios.matricula')
+                                @if($sortField === 'matricula')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
@@ -143,11 +131,11 @@
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('funcionarios.nome')"
+                        <th wire:click="sortBy('funcionario')"
                             class="cursor-pointer hover:bg-neutral-focus transition-colors">
                             <div class="flex items-center gap-2">
                                 <span>NOME</span>
-                                @if($sortField === 'funcionarios.nome')
+                                @if($sortField === 'funcionario')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
@@ -155,11 +143,10 @@
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('vinculos.nome')"
-                            class="cursor-pointer hover:bg-neutral-focus transition-colors">
+                        <th wire:click="sortBy('vinculo')" class="cursor-pointer hover:bg-neutral-focus transition-colors">
                             <div class="flex items-center gap-2">
                                 <span>VÍNCULO</span>
-                                @if($sortField === 'vinculos.nome')
+                                @if($sortField === 'vinculo')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
@@ -167,11 +154,15 @@
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('cargos.nome')"
-                            class="cursor-pointer hover:bg-neutral-focus transition-colors">
+                        <th class="cursor-default">
                             <div class="flex items-center gap-2">
                                 <span>CARGO</span>
-                                @if($sortField === 'cargos.nome')
+                            </div>
+                        </th>
+                        <th wire:click="sortBy('lotacao')" class="cursor-pointer hover:bg-neutral-focus transition-colors">
+                            <div class="flex items-center gap-2">
+                                <span>LOTAÇÃO</span>
+                                @if($sortField === 'lotacao')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
@@ -179,23 +170,10 @@
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('lotacoes.nome')"
-                            class="cursor-pointer hover:bg-neutral-focus transition-colors">
+                        <th wire:click="sortBy('situacao')" class="cursor-pointer hover:bg-neutral-focus transition-colors">
                             <div class="flex items-center gap-2">
-                                <span>LOTACAO</span>
-                                @if($sortField === 'lotacoes.nome')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
-                                    </svg>
-                                @endif
-                            </div>
-                        </th>
-                        <th wire:click="sortBy('situacoes.nome')"
-                            class="cursor-pointer hover:bg-neutral-focus transition-colors">
-                            <div class="flex items-center gap-2">
-                                <span>SITUACAO</span>
-                                @if($sortField === 'situacoes.nome')
+                                <span>SITUAÇÃO</span>
+                                @if($sortField === 'situacao')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
@@ -243,83 +221,68 @@
                 </thead>
                 <thead class="bg-neutral/10">
                     <tr>
-                        <th></th>
                         <th><input type="text" wire:model.live.debounce.500ms="matricula" placeholder="Pesquisar..."
-                                class="input input-sm">
+                                class="input input-sm w-full">
                         </th>
                         <th><input type="text" wire:model.live.debounce.500ms="nome" placeholder="Pesquisar..."
-                                class="input input-sm">
+                                class="input input-sm w-full">
                         </th>
                         <th>
-                            <select wire:model.live="vinculo" class="select select-sm">
+                            <select wire:model.live="vinculo" class="select select-sm w-full">
                                 <option selected value="">Todos</option>
-                                @foreach ($vinculos as $vinculo)
-                                    <option value="{{ $vinculo->id }}">{{ $vinculo->nome }}</option>
+                                @foreach ($vinculos as $v)
+                                    <option value="{{ $v->value }}">{{ $v->label() }}</option>
                                 @endforeach
                             </select>
                         </th>
                         <th>
-                            <select wire:model.live="cargo" class="select select-sm">
+                            <select wire:model.live="cargo" class="select select-sm w-full">
                                 <option selected value="">Todos</option>
-                                @foreach ($cargos as $cargo)
-                                    <option value="{{ $cargo->id }}">{{ $cargo->nome }}</option>
+                                @foreach ($cargos as $id => $nome)
+                                    <option value="{{ $id }}">{{ $nome }}</option>
                                 @endforeach
                             </select>
                         </th>
-                        <th>
-                            <select wire:model.live="lotacao" class="select select-sm">
-                                <option selected value="">Todos</option>
-                                @foreach ($lotacoes as $lotacao)
-                                    <option value="{{ $lotacao->id }}">{{ $lotacao->nome }}</option>
-                                @endforeach
-                            </select>
+                        <th><input type="text" wire:model.live.debounce.500ms="lotacao" placeholder="Pesquisar..."
+                                class="input input-sm w-full">
                         </th>
                         <th>
-                            <select wire:model.live="situacao" class="select select-sm">
+                            <select wire:model.live="situacao" class="select select-sm w-full">
                                 <option selected value="">Todos</option>
-                                @foreach ($situacoes as $situacao)
-                                    <option value="{{ $situacao->id }}">{{ $situacao->nome }}</option>
+                                @foreach ($situacoes as $s)
+                                    <option value="{{ $s->value }}">{{ $s->label() }}</option>
                                 @endforeach
                             </select>
                         </th>
                         <th><input type="text" wire:model.live.debounce.500ms="proventos" placeholder="Pesquisar..."
-                                class="input input-sm">
+                                class="input input-sm w-full">
                         </th>
                         <th><input type="text" wire:model.live.debounce.500ms="descontos" placeholder="Pesquisar..."
-                                class="input input-sm">
+                                class="input input-sm w-full">
                         </th>
                         <th><input type="text" wire:model.live.debounce.500ms="liquido" placeholder="Pesquisar..."
-                                class="input input-sm">
+                                class="input input-sm w-full">
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($despesas as $despesa)
                         <tr class="hover">
+                            <td class="font-mono text-sm">{{ $despesa->matricula }}</td>
                             <td>
-                                <div wire:click="modal" class="btn btn-primary btn-circle">
-                                    <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                    </svg>
-                                </div>
-                            </td>
-                            <td class="font-mono text-sm">{{ $despesa->funcionario->matricula }}</td>
-                            <td>
-                                <div class="font-medium">{{ $despesa->funcionario->nome }}</div>
+                                <div class="font-medium">{{ $despesa->funcionario }}</div>
                             </td>
                             <td>
-                                <div class="text-xs text-base-content/60">{{ $despesa->funcionario->vinculo->nome }}</div>
+                                <div class="text-xs text-base-content/60">{{ $despesa->vinculo?->label() }}</div>
                             </td>
                             <td>
-                                <div class="text-sm">{{ $despesa->funcionario->cargo->nome }}</div>
+                                <div class="text-sm">{{ $despesa->cargo->nome }}</div>
                             </td>
                             <td>
-                                <div class="text-sm">{{ $despesa->funcionario->lotacao->nome }}</div>
+                                <div class="text-sm">{{ $despesa->lotacao }}</div>
                             </td>
                             <td>
-                                <span class="badge badge-outline badge-sm">{{ $despesa->funcionario->situacao->nome }}</span>
+                                <span class="badge badge-outline badge-sm">{{ $despesa->situacao?->label() }}</span>
                             </td>
                             <td class="text-right font-semibold">
                                 R$ {{ number_format($despesa->total_proventos, 2, ',', '.') }}
@@ -348,7 +311,7 @@
                 </tbody>
                 <tfoot class="bg-base-200 font-bold">
                     <tr>
-                        <td colspan="7" class="text-right text-lg">Total</td>
+                        <td colspan="6" class="text-right text-lg">Total</td>
                         <td class="text-right text-lg text-green-700">
                             R$ {{ number_format($total_proventos, 2, ',', '.') }}
                         </td>
@@ -414,6 +377,4 @@
         @endif
         <!-- End Pagination -->
     @endif
-
-
 </div>
