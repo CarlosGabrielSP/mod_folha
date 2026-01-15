@@ -14,7 +14,9 @@
 <body class="bg-base-100 text-base-content min-h-screen">
     <x-layouts.navbar-primary />
 
-    {{ $slot }}
+    <div class="container mx-auto">
+        {{ $slot }}
+    </div>
 
     <footer class="footer footer-center p-4 text-accent mt-4">
         <div>

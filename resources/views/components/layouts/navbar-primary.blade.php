@@ -1,4 +1,4 @@
-<nav class="navbar bg-neutral">
+<nav class="navbar container mx-auto bg-neutral">
     <div class="navbar-start">
         <a href="{{ route('home') }}" class="btn btn-primary text-xl">Portal de Transparência</a>
     </div>
