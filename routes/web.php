@@ -8,21 +8,21 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $entidade = Entidade::first();
     if (!$entidade) abort(404);
-    return redirect("/servidores/{$entidade->slug}");
+    return redirect("{$entidade->slug}/servidores");
 })->name('home');
 
-Route::get('/servidores/', function () {
+Route::get('/servidores', function () {
     $entidade = Entidade::first();
     if (!$entidade) abort(404);
-    return redirect("/servidores/{$entidade->slug}");
+    return redirect("{$entidade->slug}/servidores");
 })->name('folhas.index');
 
-Route::get('/servidores/{slug}', [FolhaController::class, 'show'])->name('folhas.show');
+Route::get('{slug}/servidores', [FolhaController::class, 'show'])->name('folhas.show');
 
-Route::get('/remuneracoes/', function () {
+Route::get('/remuneracoes', function () {
     $entidade = Entidade::first();
     if (!$entidade) abort(404);
-    return redirect("/remuneracoes/{$entidade->slug}");
+    return redirect("{$entidade->slug}/remuneracoes");
 })->name('cargos.index');
 
-Route::get('/remuneracoes/{slug}', [CargoController::class, 'index'])->name('cargos.index');
+Route::get('{slug}/remuneracoes', [CargoController::class, 'index'])->name('cargos.index');
